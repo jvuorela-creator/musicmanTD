@@ -1,17 +1,30 @@
-# Asenna ensin kirjasto komennolla: pip install midiutil
 from midiutil import MIDIFile
+import os
 
-midi = MIDIFile(2)
-midi.addTempo(0, 0, 60)
+def luo_midi():
+    # Luodaan MIDI-objekti (2 raitaa)
+    midi = MIDIFile(2)
+    midi.addTempo(0, 0, 60)
 
-# Basso-syke (C-molli)
-for i in range(32):
-    midi.addNote(0, 0, 36, i * 0.5, 0.5, 60) # C1 nuotti
+    # Raita 0: Basso-syke
+    # 32 kpl 1/8-nuotteja (C1 = 36)
+    for i in range(32):
+        midi.addNote(0, 0, 36, i * 0.5, 0.5, 60)
 
-# Synkkä melodia
-notes = [48, 44, 43, 39, 48, 51, 50, 46] # C, Ab, G, Eb...
-for i, note in enumerate(notes):
-    midi.addNote(1, 0, note, i * 4, 4, 70)
+    # Raita 1: Synkkä melodia
+    # C, Ab, G, Eb, C, F, Eb, D (C-molli asteikkoa)
+    notes = [48, 44, 43, 39, 48, 41, 39, 38]
+    for i, note in enumerate(notes):
+        midi.addNote(1, 0, note, i * 4, 4, 75)
 
-with open("tangerine_dream.mid", "wb") as f:
-    midi.writeFile(f)
+    tiedoston_nimi = "tangerine_dream.mid"
+    
+    with open(tiedoston_nimi, "wb") as f:
+        midi.writeFile(f)
+    
+    print(f"--- VALMIS! ---")
+    print(f"Tiedosto '{tiedoston_nimi}' on luotu onnistuneesti.")
+    print(f"Löydät sen täältä: {os.getcwd()}")
+
+if __name__ == "__main__":
+    luo_midi()
