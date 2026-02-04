@@ -17,7 +17,7 @@ def luo_midi():
     for i, note in enumerate(notes):
         midi.addNote(1, 0, note, i * 4, 4, 75)
 
-    tiedoston_nimi = "tangerine_dream.mid"
+    tiedoston_nimi = r"C:\Users\Kayttaja\Desktop\tangerine_dream.mid"
     
     with open(tiedoston_nimi, "wb") as f:
         midi.writeFile(f)
