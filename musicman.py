@@ -1,12 +1,16 @@
+import streamlit as st
 from midiutil import MIDIFile
-from pathlib import Path  # Tämä kirjasto auttaa kansioiden hallinnassa
+from io import BytesIO  # Tarvitaan tiedoston käsittelyyn muistissa
 
-def luo_midi():
-    # Luodaan MIDI-objekti (2 raitaa)
+st.title("Tangerine Dream MIDI-generaattori 🎹")
+st.write("Tämä sovellus luo MIDI-tiedoston suoraan selaimessa.")
+
+def luo_midi_data():
+    # Luodaan MIDI-objekti
     midi = MIDIFile(2)
     midi.addTempo(0, 0, 60)
 
-    # Raita 0: Basso-syke
+    # Raita 0: Basso
     for i in range(32):
         midi.addNote(0, 0, 36, i * 0.5, 0.5, 60)
 
@@ -15,29 +19,24 @@ def luo_midi():
     for i, note in enumerate(notes):
         midi.addNote(1, 0, note, i * 4, 4, 75)
 
-    # MÄÄRITETÄÄN TALLENNUSPAIKKA:
-    # Path.home() hakee käyttäjäkansion (esim. C:\Users\Matti)
-    # ja lisää siihen "Downloads"-kansion.
-    lataukset_kansio = Path.home() / "Downloads"
+    # TÄRKEÄ MUUTOS:
+    # Emme tallenna tiedostoa levylle (open...), vaan muistiin (BytesIO).
+    # Tämä on välttämätöntä pilvipalveluissa.
+    mem_file = BytesIO()
+    midi.writeFile(mem_file)
     
-    # Luodaan lopullinen tiedostopolku
-    tiedoston_nimi = lataukset_kansio / "tangerine_dream.mid"
-    
-    try:
-        with open(tiedoston_nimi, "wb") as f:
-            midi.writeFile(f)
-        
-        print(f"--- VALMIS! ---")
-        print(f"Tiedosto tallennettiin onnistuneesti Lataukset-kansioon.")
-        print(f"Tarkka sijainti: {tiedoston_nimi}")
-        
-    except FileNotFoundError:
-        # Varmuuskopio: jos "Downloads" kansiota ei löydy (harvinaista),
-        # tallennetaan nykyiseen kansioon.
-        print("Huom: Downloads-kansiota ei löytynyt automaattisesti.")
-        with open("tangerine_dream.mid", "wb") as f:
-            midi.writeFile(f)
-        print("Tiedosto tallennettiin samaan kansioon, jossa koodi on.")
+    # Palautetaan tiedoston binääridata
+    return mem_file.getvalue()
 
-if __name__ == "__main__":
-    luo_midi()
+# Luodaan data valmiiksi
+midi_data = luo_midi_data()
+
+# Luodaan latauspainike Streamlitiin
+st.download_button(
+    label="Lataa MIDI-tiedosto",
+    data=midi_data,
+    file_name="tangerine_dream.mid",
+    mime="audio/midi"
+)
+
+st.success("Tiedosto on valmis ladattavaksi yllä olevasta painikkeesta!")
